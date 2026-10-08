@@ -8,7 +8,9 @@
 <meta name="theme-color" content="#0f766e">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f766e'/><path d='M26 66 L44 44 L58 58 L76 32' stroke='white' stroke-width='9' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
-<link rel="stylesheet" href="styles.css">
+
+<!-- ✅ CSS (flat structure, filename is style.css) -->
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -108,7 +110,7 @@
 <div id="modalRoot"></div>
 <div id="toastRoot" class="toasts" role="status" aria-live="polite"></div>
 
-<!-- ================= TEMPLATES ================= -->
+<!-- ================= MODAL TEMPLATE ================= -->
 <template id="tpl-modal">
   <div class="modal-backdrop">
     <div class="modal" role="dialog" aria-modal="true">
@@ -124,11 +126,16 @@
   </div>
 </template>
 
+<!-- ================= SCRIPTS (LOAD ORDER MATTERS) ================= -->
+<!-- 1. External: Supabase library -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="js/i18n.js"></script>
-<script src="js/store.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/views.js"></script>
-<script src="js/app.js"></script>
+
+<!-- 2. Internal modules — order is required for dependencies -->
+<script src="i18n.js"></script>       <!-- Provides: window.I18n   -->
+<script src="store.js"></script>      <!-- Uses I18n, provides: window.Store -->
+<script src="ui.js"></script>         <!-- Uses I18n, provides: window.UI -->
+<script src="views.js"></script>      <!-- Uses I18n, Store, UI, provides: window.Views -->
+<script src="app.js"></script>        <!-- Uses all, boots the app -->
+
 </body>
 </html>

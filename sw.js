@@ -1,16 +1,16 @@
 /* =========================================================
    Service Worker — offline cache for Business Development
    ========================================================= */
-const CACHE = 'biz-dev-v1';
+const CACHE = 'biz-dev-v2';
 const ASSETS = [
   './',
   './index.html',
-  './styles.css',
-  './js/i18n.js',
-  './js/store.js',
-  './js/ui.js',
-  './js/views.js',
-  './js/app.js',
+  './style.css',
+  './i18n.js',
+  './store.js',
+  './ui.js',
+  './views.js',
+  './app.js',
   './manifest.json',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js'
 ];
