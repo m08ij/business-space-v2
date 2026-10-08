@@ -191,7 +191,7 @@
       reset_confirm: 'سيتم حذف جميع البيانات نهائيًا. هل أنت متأكد؟',
       supabase_config: 'إعدادات Supabase',
       supabase_url: 'رابط المشروع (URL)',
-      supabase_key: 'المفتاح العام (anon key)',
+      supabase_key: 'المفتاح العام (publishable key)',
       connect: 'اتصال', disconnect: 'فصل',
       connected: 'متصل', not_connected: 'غير متصل',
       sync_now: 'مزامنة الآن',
@@ -234,7 +234,16 @@
       confirm_delete_title: 'تأكيد الحذف',
       confirm_delete_body: 'لا يمكن التراجع عن هذا الإجراء.',
       delete_kr_confirm: 'حذف هذه النتيجة؟',
-      delete_item_confirm: 'حذف هذا العنصر؟'
+      delete_item_confirm: 'حذف هذا العنصر؟',
+
+      /* Auth / Countries */
+      guest_mode: 'الدخول كضيف (بدون مزامنة)',
+      or: 'أو',
+      password_too_short: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل',
+      welcome_back: 'مرحبًا بعودتك',
+      countries: 'الدول',
+      search_countries: 'ابحث عن دولة…',
+      no_countries: 'لم يتم اختيار دول'
     },
 
     en: {
@@ -423,7 +432,7 @@
       reset_confirm: 'All data will be permanently deleted. Are you sure?',
       supabase_config: 'Supabase Configuration',
       supabase_url: 'Project URL',
-      supabase_key: 'Anon Public Key',
+      supabase_key: 'Publishable Key',
       connect: 'Connect', disconnect: 'Disconnect',
       connected: 'Connected', not_connected: 'Not connected',
       sync_now: 'Sync Now',
@@ -466,7 +475,16 @@
       confirm_delete_title: 'Confirm Delete',
       confirm_delete_body: 'This action cannot be undone.',
       delete_kr_confirm: 'Delete this key result?',
-      delete_item_confirm: 'Delete this item?'
+      delete_item_confirm: 'Delete this item?',
+
+      /* Auth / Countries */
+      guest_mode: 'Continue as Guest (no sync)',
+      or: 'or',
+      password_too_short: 'Password must be at least 6 characters',
+      welcome_back: 'Welcome back',
+      countries: 'Countries',
+      search_countries: 'Search countries…',
+      no_countries: 'No countries selected'
     }
   };
 

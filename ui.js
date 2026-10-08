@@ -17,7 +17,7 @@
       .replace(/'/g, '&#39;');
   }
 
-  /* ---------- DOM helpers ---------- */
+  /* ---------- DOM helpers (must come BEFORE countryMultiSelect) ---------- */
   function el(tag, attrs, children) {
     const node = document.createElement(tag);
     if (attrs) {
@@ -44,6 +44,134 @@
 
   const qs  = (sel, root) => (root || document).querySelector(sel);
   const qsa = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+
+  /* ---------- Country Multi-Select ---------- */
+  const COUNTRIES = [
+    { code: 'JO', name_ar: 'الأردن', name_en: 'Jordan', flag: '🇯🇴' },
+    { code: 'SA', name_ar: 'السعودية', name_en: 'Saudi Arabia', flag: '🇸🇦' },
+    { code: 'AE', name_ar: 'الإمارات', name_en: 'UAE', flag: '🇦🇪' },
+    { code: 'EG', name_ar: 'مصر', name_en: 'Egypt', flag: '🇪🇬' },
+    { code: 'QA', name_ar: 'قطر', name_en: 'Qatar', flag: '🇶🇦' },
+    { code: 'KW', name_ar: 'الكويت', name_en: 'Kuwait', flag: '🇰🇼' },
+    { code: 'BH', name_ar: 'البحرين', name_en: 'Bahrain', flag: '🇧🇭' },
+    { code: 'OM', name_ar: 'عمان', name_en: 'Oman', flag: '🇴🇲' },
+    { code: 'LB', name_ar: 'لبنان', name_en: 'Lebanon', flag: '🇱🇧' },
+    { code: 'IQ', name_ar: 'العراق', name_en: 'Iraq', flag: '🇮🇶' },
+    { code: 'SY', name_ar: 'سوريا', name_en: 'Syria', flag: '🇸🇾' },
+    { code: 'PS', name_ar: 'فلسطين', name_en: 'Palestine', flag: '🇵🇸' },
+    { code: 'MA', name_ar: 'المغرب', name_en: 'Morocco', flag: '🇲🇦' },
+    { code: 'DZ', name_ar: 'الجزائر', name_en: 'Algeria', flag: '🇩🇿' },
+    { code: 'TN', name_ar: 'تونس', name_en: 'Tunisia', flag: '🇹🇳' },
+    { code: 'LY', name_ar: 'ليبيا', name_en: 'Libya', flag: '🇱🇾' },
+    { code: 'SD', name_ar: 'السودان', name_en: 'Sudan', flag: '🇸🇩' },
+    { code: 'YE', name_ar: 'اليمن', name_en: 'Yemen', flag: '🇾🇪' },
+    { code: 'TR', name_ar: 'تركيا', name_en: 'Turkey', flag: '🇹🇷' },
+    { code: 'US', name_ar: 'أمريكا', name_en: 'USA', flag: '🇺🇸' },
+    { code: 'GB', name_ar: 'بريطانيا', name_en: 'UK', flag: '🇬🇧' },
+    { code: 'DE', name_ar: 'ألمانيا', name_en: 'Germany', flag: '🇩🇪' },
+    { code: 'FR', name_ar: 'فرنسا', name_en: 'France', flag: '🇫🇷' },
+    { code: 'IN', name_ar: 'الهند', name_en: 'India', flag: '🇮🇳' },
+    { code: 'CN', name_ar: 'الصين', name_en: 'China', flag: '🇨🇳' },
+    { code: 'JP', name_ar: 'اليابان', name_en: 'Japan', flag: '🇯🇵' }
+  ];
+
+  function countryName(c) {
+    const lang = global.I18n ? I18n.getLang() : 'ar';
+    return lang === 'ar' ? c.name_ar : c.name_en;
+  }
+
+  function countryMultiSelect(selected) {
+    const selectedSet = new Set(Array.isArray(selected) ? selected : []);
+    const wrap = el('div', { class: 'country-select' });
+    const chips = el('div', { class: 'country-chips' });
+    const input = el('input', {
+      class: 'input country-search',
+      placeholder: (global.I18n ? I18n.t('search_countries') : 'Search countries…'),
+      type: 'text'
+    });
+    const dropdown = el('div', { class: 'country-dropdown hidden' });
+    const hidden = el('input', { type: 'hidden', name: 'countries', value: Array.from(selectedSet).join(',') });
+
+    function renderChips() {
+      chips.innerHTML = '';
+      if (!selectedSet.size) {
+        chips.appendChild(el('span', {
+          class: 'country-empty',
+          text: (global.I18n ? I18n.t('no_countries') : 'No countries selected')
+        }));
+        return;
+      }
+      Array.from(selectedSet).forEach(code => {
+        const c = COUNTRIES.find(x => x.code === code);
+        if (!c) return;
+        chips.appendChild(el('span', { class: 'country-chip' }, [
+          el('span', { text: c.flag + ' ' + countryName(c) }),
+          el('button', {
+            type: 'button',
+            class: 'country-chip-x',
+            onclick: () => {
+              selectedSet.delete(code);
+              hidden.value = Array.from(selectedSet).join(',');
+              renderChips();
+              renderDropdown(input.value);
+            }
+          }, ['×'])
+        ]));
+      });
+    }
+
+    function renderDropdown(query) {
+      dropdown.innerHTML = '';
+      const q = (query || '').toLowerCase().trim();
+      const filtered = COUNTRIES.filter(c => {
+        if (!q) return true;
+        return c.name_ar.includes(q) ||
+               c.name_en.toLowerCase().includes(q) ||
+               c.code.toLowerCase().includes(q);
+      });
+      if (!filtered.length) {
+        dropdown.appendChild(el('div', { class: 'country-opt muted', text: (global.I18n ? I18n.t('no_data') : 'No data') }));
+        return;
+      }
+      filtered.forEach(c => {
+        const isSel = selectedSet.has(c.code);
+        dropdown.appendChild(el('button', {
+          type: 'button',
+          class: 'country-opt' + (isSel ? ' selected' : ''),
+          onclick: () => {
+            if (isSel) selectedSet.delete(c.code);
+            else selectedSet.add(c.code);
+            hidden.value = Array.from(selectedSet).join(',');
+            renderChips();
+            renderDropdown(input.value);
+            input.focus();
+          }
+        }, [
+          el('span', { class: 'country-flag', text: c.flag }),
+          el('span', { class: 'country-name', text: countryName(c) }),
+          el('span', { class: 'country-code muted text-xs', text: c.code }),
+          isSel ? el('span', { class: 'country-check', text: '✓' }) : null
+        ].filter(Boolean)));
+      });
+    }
+
+    input.addEventListener('focus', () => {
+      dropdown.classList.remove('hidden');
+      renderDropdown(input.value);
+    });
+    input.addEventListener('input', () => renderDropdown(input.value));
+    input.addEventListener('blur', () => {
+      setTimeout(() => dropdown.classList.add('hidden'), 180);
+    });
+
+    wrap.appendChild(hidden);
+    wrap.appendChild(chips);
+    wrap.appendChild(input);
+    wrap.appendChild(dropdown);
+    renderChips();
+
+    return wrap;
+  }
 
   /* ---------- Formatting ---------- */
   function fmtDate(ts) {
@@ -177,7 +305,6 @@
     document.getElementById('modalRoot').appendChild(node);
     activeModal = { node, onClose, escHandler };
 
-    // focus first input
     setTimeout(() => {
       const first = bodyEl.querySelector('input, select, textarea, button');
       if (first) first.focus();
@@ -234,7 +361,7 @@
     return 'danger';
   }
 
-  /* ---------- Status/priority label maps ---------- */
+  /* ---------- Status / priority label maps ---------- */
   const STATUS_LABEL = {
     idea: 'status_idea', planning: 'status_planning', active: 'status_active',
     on_hold: 'status_on_hold', completed: 'status_completed',
@@ -263,6 +390,7 @@
     esc, el, qs, qsa,
     fmtDate, fmtDateTime, fmtMoney, fmtNum, fmtPct, relTime, daysBetween, todayISO, initials,
     toast, openModal, closeModal, confirmDialog,
-    progressClass, statusLabel, statusTone, prioLabel, T
+    progressClass, statusLabel, statusTone, prioLabel, T,
+    countryMultiSelect, COUNTRIES
   };
 })(window);

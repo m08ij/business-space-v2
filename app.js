@@ -3,12 +3,11 @@
    ========================================================= */
 
 /* =========================================================
-   1. SUPABASE CONFIGURATION
-   Paste your Project URL and Publishable key below.
-   (Do NOT use the Secret key here!)
+   SUPABASE CONFIGURATION
+   Publishable key only — never use the secret key here.
    ========================================================= */
 const SUPABASE_CONFIG = {
-  url: 'https://cqgkpbaaiahximxpjews.supabase.co/', 
+  url: 'https://cqgkpbaaiahximxpjews.supabase.co',
   publishableKey: 'sb_publishable_cC1Urngf05g4syObroyqBw_9Zb64b3b'
 };
 /* ========================================================= */
@@ -109,6 +108,95 @@ const SUPABASE_CONFIG = {
     setLang(I18n.getLang() === 'ar' ? 'en' : 'ar');
   });
 
+  /* ---------- Authentication ---------- */
+  const loginScreen = document.getElementById('loginScreen');
+  const loginForm = document.getElementById('loginForm');
+  const loginEmail = document.getElementById('loginEmail');
+  const loginPassword = document.getElementById('loginPassword');
+  const loginError = document.getElementById('loginError');
+  const loginSubmit = document.getElementById('loginSubmit');
+  const guestBtn = document.getElementById('guestBtn');
+  let authMode = 'signin';
+
+  function showLogin() {
+    loginScreen.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function hideLogin() {
+    loginScreen.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  function setAuthMode(mode) {
+    authMode = mode;
+    document.querySelectorAll('.login-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.mode === mode);
+    });
+    loginSubmit.querySelector('span').textContent = mode === 'signin'
+      ? I18n.t('sign_in')
+      : I18n.t('sign_up');
+    loginPassword.setAttribute('autocomplete', mode === 'signin' ? 'current-password' : 'new-password');
+    loginError.textContent = '';
+  }
+
+  function checkAuthState() {
+    const s = Store.getSettings();
+    if (s.guestMode || (s.user && s.supabaseUrl && s.supabaseKey)) {
+      hideLogin();
+    } else {
+      showLogin();
+    }
+  }
+
+  function bindAuthUI() {
+    document.querySelectorAll('.login-tab').forEach(tab => {
+      tab.addEventListener('click', () => setAuthMode(tab.dataset.mode));
+    });
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      loginError.textContent = '';
+      const email = loginEmail.value.trim();
+      const password = loginPassword.value;
+      if (!email) { loginError.textContent = I18n.t('msg_invalid_email'); return; }
+      if (password.length < 6) { loginError.textContent = I18n.t('password_too_short'); return; }
+
+      loginSubmit.disabled = true;
+      const originalText = loginSubmit.querySelector('span').textContent;
+      loginSubmit.querySelector('span').textContent = I18n.t('loading');
+
+      try {
+        if (authMode === 'signin') {
+          await Store.signIn(email, password);
+        } else {
+          await Store.signUp(email, password);
+        }
+        UI.toast(I18n.t('msg_login_success'), 'success');
+        hideLogin();
+        navigate();
+        updateBadges();
+      } catch (err) {
+        loginError.textContent = err.message || I18n.t('msg_error');
+      } finally {
+        loginSubmit.disabled = false;
+        loginSubmit.querySelector('span').textContent = originalText;
+      }
+    });
+
+    guestBtn.addEventListener('click', () => {
+      Store.setSettings({ guestMode: true, user: null });
+      hideLogin();
+      navigate();
+      updateBadges();
+    });
+
+    document.getElementById('openSettingsFromLogin').addEventListener('click', () => {
+      hideLogin();
+      location.hash = '#/settings';
+    });
+  }
+
   /* ---------- Boot ---------- */
   function boot() {
     const s = Store.getSettings();
@@ -117,7 +205,7 @@ const SUPABASE_CONFIG = {
     langLabel.textContent = (s.lang || 'ar') === 'ar' ? 'EN' : 'ع';
     I18n.apply(document);
 
-    // AUTO-CONFIG SUPABASE IF KEYS ARE PROVIDED IN CONFIG
+    /* Auto-configure Supabase if keys are provided in config */
     if (SUPABASE_CONFIG.url && SUPABASE_CONFIG.url !== 'YOUR_SUPABASE_PROJECT_URL_HERE') {
       Store.setSettings({
         supabaseUrl: SUPABASE_CONFIG.url,
@@ -129,6 +217,13 @@ const SUPABASE_CONFIG = {
     Store.subscribe(updateBadges);
 
     window.addEventListener('hashchange', navigate);
+
+    /* Bind auth UI handlers */
+    bindAuthUI();
+
+    /* Decide whether to show login or app */
+    checkAuthState();
+
     navigate();
     Store.updateSyncChip();
     updateBadges();

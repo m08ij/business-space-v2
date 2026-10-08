@@ -5,7 +5,6 @@
   'use strict';
 
   const S = () => global.Store;
-  const U = () => global.UI;
   const T = (k, f) => I18n.t(k, f);
   const { el, esc } = UI;
 
@@ -55,7 +54,6 @@
       ])
     ]));
 
-    /* Stats grid */
     const stats = el('div', { class: 'grid grid-4' });
     stats.appendChild(stat(T('nav_projects'), projects.length,
       T('status_active') + ': ' + activeCount, 'primary', svgFolder()));
@@ -67,7 +65,6 @@
       T('weighted') + ': ' + UI.fmtMoney(weighted), 'success', svgChart()));
     wrap.appendChild(stats);
 
-    /* Budget + Impact row */
     const budgetPct = totalBudget ? Math.round((usedBudget / totalBudget) * 100) : 0;
     const row2 = el('div', { class: 'grid grid-2' });
 
@@ -104,7 +101,6 @@
     row2.appendChild(impactCard);
     wrap.appendChild(row2);
 
-    /* Upcoming + Recent */
     const row3 = el('div', { class: 'grid grid-2' });
 
     const upCard = el('div', { class: 'card' }, [
@@ -117,10 +113,7 @@
       upcoming.forEach(t => {
         const overdue = t.due_date && new Date(t.due_date) < new Date();
         list.appendChild(el('div', { class: 'list-item' }, [
-          el('div', {
-            class: 'avatar sm',
-            text: UI.initials(t.assignee || t.title)
-          }),
+          el('div', { class: 'avatar sm', text: UI.initials(t.assignee || t.title) }),
           el('div', { class: 'grow' }, [
             el('div', { class: 'title', text: t.title }),
             el('div', { class: 'meta', text: UI.fmtDate(t.due_date) })
@@ -401,7 +394,8 @@
       field(T('owner'), input('owner', d.owner)),
       field(T('budget'), input('budget', d.budget, { type: 'number', min: 0 })),
       field(T('start_date'), input('start_date', d.start_date, { type: 'date' })),
-      field(T('end_date'), input('end_date', d.end_date, { type: 'date' }))
+      field(T('end_date'), input('end_date', d.end_date, { type: 'date' })),
+      field(T('countries'), UI.countryMultiSelect(d.countries || []), 'span-full')
     ]);
     const form = el('form', {}, [body]);
     const footer = el('div', { class: 'row', style: 'width:100%' }, [
@@ -652,7 +646,7 @@
   }
 
   /* ============================================================
-     TASKS (GLOBAL)
+     TASKS
      ============================================================ */
   function tasks() {
     const all = S().list('tasks');
@@ -679,7 +673,6 @@
       ])
     ]));
 
-    /* Filters */
     const filters = el('div', { class: 'row tight' }, [
       el('select', {
         class: 'select', style: 'max-width:220px',
@@ -778,7 +771,7 @@
   }
 
   /* ============================================================
-     STRATEGY (SWOT + PESTEL + OKRs)
+     STRATEGY
      ============================================================ */
   function strategy() {
     const wrap = el('div', { class: 'col', style: 'gap:22px' });
@@ -804,12 +797,12 @@
   function swotBlock() {
     const grid = el('div', { class: 'swot-grid' });
     const quadrants = [
-      ['s', 'swot_strengths', 'Strengths'],
-      ['w', 'swot_weaknesses', 'Weaknesses'],
-      ['o', 'swot_opportunities', 'Opportunities'],
-      ['t', 'swot_threats', 'Threats']
+      ['s', 'swot_strengths'],
+      ['w', 'swot_weaknesses'],
+      ['o', 'swot_opportunities'],
+      ['t', 'swot_threats']
     ];
-    quadrants.forEach(([key, labelKey, defaultText]) => {
+    quadrants.forEach(([key, labelKey]) => {
       const items = S().list('swot', x => x.quadrant === key);
       const cell = el('div', { class: 'swot-cell ' + key }, [
         el('header', {}, [
@@ -967,7 +960,7 @@
   }
 
   /* ============================================================
-     IMPACT (SDG + ESG + P5)
+     IMPACT
      ============================================================ */
   function impact() {
     const wrap = el('div', { class: 'col', style: 'gap:22px' });
@@ -978,7 +971,6 @@
       ])
     ]));
 
-    /* SDG */
     wrap.appendChild(el('h2', { class: 'section-title', text: T('sdg_title') }));
     const selected = new Set(S().list('sdg').map(s => s.number));
     const sdgGrid = el('div', { class: 'sdg-grid' });
@@ -1005,7 +997,6 @@
     }
     wrap.appendChild(sdgGrid);
 
-    /* ESG */
     wrap.appendChild(el('h2', { class: 'section-title', text: T('esg_title') }));
     const esgCard = el('div', { class: 'card' }, [
       el('div', { class: 'card-body' }, [
@@ -1033,7 +1024,6 @@
     )]);
     wrap.appendChild(esgCard);
 
-    /* P5 */
     wrap.appendChild(el('h2', { class: 'section-title', text: T('p5_title') }));
     const p5Grid = el('div', { class: 'p5-grid' });
     [
@@ -1067,7 +1057,7 @@
   }
 
   /* ============================================================
-     SALES PIPELINE (Kanban)
+     SALES PIPELINE
      ============================================================ */
   const STAGES = ['lead', 'qualified', 'proposal', 'negotiation', 'won', 'lost'];
 
@@ -1100,7 +1090,6 @@
       stat(T('total'), deals.length, '', 'purple', svgFolder())
     ]));
 
-    /* Kanban */
     const kanban = el('div', { class: 'kanban' });
     STAGES.forEach(stage => {
       const stageDeals = deals.filter(d => d.stage === stage);
@@ -1166,7 +1155,8 @@
       field(T('probability'), input('probability', d.probability, { type: 'number', min: 0, max: 100 })),
       field(T('expected_close'), input('expected_close', d.expected_close, { type: 'date' })),
       field(T('owner'), input('owner', d.owner)),
-      field(T('notes'), textarea('notes', d.notes), 'span-full')
+      field(T('notes'), textarea('notes', d.notes), 'span-full'),
+      field(T('countries'), UI.countryMultiSelect(d.countries || []), 'span-full')
     ]);
     const form = el('form', {}, [body]);
     const footer = el('div', { class: 'row', style: 'width:100%' }, [
@@ -1303,7 +1293,6 @@
       ])
     ]));
 
-    /* Language & Theme */
     wrap.appendChild(el('div', { class: 'card' }, [
       el('div', { class: 'card-head' }, [el('div', { class: 'card-title', text: T('language') + ' / ' + T('theme') })]),
       el('div', { class: 'card-body' }, [
@@ -1330,7 +1319,6 @@
       ])
     ]));
 
-    /* Supabase */
     const user = s.user;
     wrap.appendChild(el('div', { class: 'card' }, [
       el('div', { class: 'card-head' }, [
@@ -1360,7 +1348,7 @@
             class: 'input', id: 'sbUrl', placeholder: 'https://xxx.supabase.co', value: s.supabaseUrl || ''
           }), 'span-2'),
           field(T('supabase_key'), el('input', {
-            class: 'input', id: 'sbKey', placeholder: 'eyJ...', value: s.supabaseKey || ''
+            class: 'input', id: 'sbKey', placeholder: 'sb_publishable_...', value: s.supabaseKey || ''
           }), 'span-2'),
           field(T('email'), el('input', { class: 'input', id: 'sbEmail', type: 'email' })),
           field(T('password'), el('input', { class: 'input', id: 'sbPass', type: 'password' }))
@@ -1400,7 +1388,6 @@
       ])
     ]));
 
-    /* Data */
     wrap.appendChild(el('div', { class: 'card' }, [
       el('div', { class: 'card-head' }, [el('div', { class: 'card-title', text: T('data_management') })]),
       el('div', { class: 'card-body' }, [
@@ -1489,6 +1476,10 @@
       else if (el.type === 'number' || el.type === 'range') data[n] = Number(el.value) || 0;
       else data[n] = el.value;
     });
+    /* Convert countries hidden input from CSV to array */
+    if (typeof data.countries === 'string') {
+      data.countries = data.countries ? data.countries.split(',').filter(Boolean) : [];
+    }
     return data;
   }
 
@@ -1536,7 +1527,6 @@
     render();
   }
 
-  /* ---------- Risk / Milestone forms ---------- */
   function riskForm(risk, projectId) {
     const isEdit = !!risk;
     const d = risk || { severity: 'med', project_id: projectId };
@@ -1632,7 +1622,7 @@
   function setRender(fn) { currentRender = fn; }
   function render() { if (currentRender) currentRender(); }
 
-  /* ---------- EXPORT (this is the key line) ---------- */
+  /* ---------- Export ---------- */
   global.Views = {
     dashboard, ideas, projects, projectDetail, tasks,
     strategy, impact, sales, meddic, reports, settings,

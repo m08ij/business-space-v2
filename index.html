@@ -15,7 +15,51 @@
 <body>
 
 <div id="app">
+<!-- ================= LOGIN SCREEN ================= -->
+<div id="loginScreen" class="login-screen hidden">
+  <div class="login-bg"></div>
+  <div class="login-card">
+    <div class="login-brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 100 100"><path d="M26 66 L44 44 L58 58 L76 32" stroke="currentColor" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <h1 data-i18n="app_name">تطوير أعمالي</h1>
+      <p data-i18n="tagline">إدارة المشاريع المستدامة</p>
+    </div>
 
+    <div class="login-tabs">
+      <button class="login-tab active" data-mode="signin" data-i18n="sign_in">تسجيل الدخول</button>
+      <button class="login-tab" data-mode="signup" data-i18n="sign_up">إنشاء حساب</button>
+    </div>
+
+    <form class="login-form" id="loginForm">
+      <div class="field">
+        <label class="label" data-i18n="email">البريد الإلكتروني</label>
+        <input type="email" id="loginEmail" class="input" placeholder="you@example.com" autocomplete="email" />
+      </div>
+      <div class="field">
+        <label class="label" data-i18n="password">كلمة المرور</label>
+        <input type="password" id="loginPassword" class="input" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <p class="login-error" id="loginError"></p>
+      <button type="submit" class="btn btn-primary btn-block" id="loginSubmit">
+        <span data-i18n="sign_in">تسجيل الدخول</span>
+      </button>
+    </form>
+
+    <div class="login-divider"><span data-i18n="or">أو</span></div>
+
+    <button class="btn btn-ghost btn-block" id="guestBtn">
+      <span data-i18n="guest_mode">الدخول كضيف (بدون مزامنة)</span>
+    </button>
+
+    <div class="login-supabase" id="loginSupabaseInfo">
+      <span class="dot"></span>
+      <small id="loginSupaLabel" data-i18n="msg_local_mode">محلي</small>
+      <button class="btn btn-sm btn-soft" id="openSettingsFromLogin" data-i18n="settings_title">الإعدادات</button>
+    </div>
+  </div>
+</div>
   <!-- ================= TOPBAR ================= -->
   <header class="topbar">
     <button class="icon-btn only-mobile" id="menuBtn" aria-label="menu">
